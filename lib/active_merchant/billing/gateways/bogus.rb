@@ -2,13 +2,19 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     # Bogus Gateway
     class BogusGateway < Gateway
+      #took these from TrustComerce documentation for cards
+      GOOD_CARD ='4111111111111111' #valid visa
+      GOOD_CARD2='5411111111111115' #valid visa
+      BAD_CARD  ='4012345678909'    #declined
+      BAD_CARD2 ='5555444433332226'    #call in
+
       AUTHORIZATION = '53433'
       
       SUCCESS_MESSAGE = "Bogus Gateway: Forced success"
       FAILURE_MESSAGE = "Bogus Gateway: Forced failure"
       ERROR_MESSAGE = "Bogus Gateway: Use CreditCard number 1 for success, 2 for exception and anything else for error"
       CREDIT_ERROR_MESSAGE = "Bogus Gateway: Use trans_id 1 for success, 2 for exception and anything else for error"
-      UNSTORE_ERROR_MESSAGE = "Bogus Gateway: Use trans_id 1 for success, 2 for exception and anything else for error"
+      UNSTORE_ERROR_MESSAGE = "Bogus Gateway: Use billing_id 1 for success, 2 for exception and anything else for error"
       CAPTURE_ERROR_MESSAGE = "Bogus Gateway: Use authorization number 1 for exception, 2 for error and anything else for success"
       VOID_ERROR_MESSAGE = "Bogus Gateway: Use authorization number 1 for exception, 2 for error and anything else for success"
       
@@ -18,10 +24,11 @@ module ActiveMerchant #:nodoc:
       self.display_name = 'Bogus'
       
       def authorize(money, creditcard, options = {})
-        case creditcard.number
-        when '1'
+        number = creditcard.is_a?(String) ? creditcard : creditcard.number
+        case number
+        when '1', GOOD_CARD, GOOD_CARD2
           Response.new(true, SUCCESS_MESSAGE, {:authorized_amount => money.to_s}, :test => true, :authorization => AUTHORIZATION )
-        when '2'
+        when '2', BAD_CARD, BAD_CARD2
           Response.new(false, FAILURE_MESSAGE, {:authorized_amount => money.to_s, :error => FAILURE_MESSAGE }, :test => true)
         else
           raise Error, ERROR_MESSAGE
@@ -29,18 +36,19 @@ module ActiveMerchant #:nodoc:
       end
   
       def purchase(money, creditcard, options = {})
-        case creditcard.number
-        when '1'
+        number = creditcard.is_a?(String) ? creditcard : creditcard.number
+        case number
+        when '1', GOOD_CARD, GOOD_CARD2
           Response.new(true, SUCCESS_MESSAGE, {:paid_amount => money.to_s}, :test => true)
-        when '2'
+        when '2', BAD_CARD, BAD_CARD2
           Response.new(false, FAILURE_MESSAGE, {:paid_amount => money.to_s, :error => FAILURE_MESSAGE },:test => true)
         else
           raise Error, ERROR_MESSAGE
         end
       end
  
-      def credit(money, ident, options = {})
-        case ident
+      def credit(money, trans_id, options = {})
+        case trans_id
         when '1'
           raise Error, CREDIT_ERROR_MESSAGE
         when '2'
@@ -50,8 +58,8 @@ module ActiveMerchant #:nodoc:
         end
       end
  
-      def capture(money, ident, options = {})
-        case ident
+      def capture(money, trans_id, options = {})
+        case trans_id
         when '1'
           raise Error, CAPTURE_ERROR_MESSAGE
         when '2'
@@ -74,12 +82,12 @@ module ActiveMerchant #:nodoc:
       
       def store(creditcard, options = {})
         case creditcard.number
-        when '1'
+        when '1', GOOD_CARD, GOOD_CARD2
           Response.new(true, SUCCESS_MESSAGE, {:billingid => '1'}, :test => true, :authorization => AUTHORIZATION )
-        when '2'
+        when '2', BAD_CARD, BAD_CARD2
           Response.new(false, FAILURE_MESSAGE, {:billingid => nil, :error => FAILURE_MESSAGE }, :test => true)
         else
-          raise Error, ERROR_MESSAGE
+          raise Error, ERROR_MESSAGE + "was #{number}"
         end              
       end
       
