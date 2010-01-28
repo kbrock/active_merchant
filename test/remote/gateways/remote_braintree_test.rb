@@ -3,6 +3,8 @@ require 'test_helper'
 class RemoteBraintreeTest < Test::Unit::TestCase
   def setup
     @gateway = BraintreeGateway.new(fixtures(:braintree))
+    #we are dealing in USD (using money for amounts would also fix)
+    @gateway.default_currency = 'USD'
 
     @amount = rand(10000) + 1001
     @credit_card = credit_card('4111111111111111')
