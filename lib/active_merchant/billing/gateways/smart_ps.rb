@@ -203,7 +203,7 @@ module ActiveMerchant #:nodoc:
       def parse(body)
         results = {}
         body.split(/&/).each do |pair|
-          key,val = pair.split(/=/)
+          key,val = pair.split(/\=/)
           results[key] = val
         end
         

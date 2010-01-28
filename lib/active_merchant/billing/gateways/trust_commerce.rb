@@ -393,7 +393,7 @@ module ActiveMerchant #:nodoc:
         results = {}
         
         body.split(/\n/).each do |pair|
-          key,val = pair.split(/=/)
+          key,val = pair.split(/\=/)
           results[key] = val
         end
         
