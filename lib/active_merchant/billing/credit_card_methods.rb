@@ -83,6 +83,7 @@ module ActiveMerchant #:nodoc:
 
           return nil
         end
+        alias_method :card_type?, :type?
         
         def last_digits(number)     
           number.to_s.length <= 4 ? number : number.to_s.slice(-4..-1) 
@@ -96,6 +97,7 @@ module ActiveMerchant #:nodoc:
         def matching_type?(number, type)
           type?(number) == type
         end
+        alias_method :matching_card_type?, :matching_type?
         
         private
         

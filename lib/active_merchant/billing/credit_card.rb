@@ -53,6 +53,15 @@ module ActiveMerchant #:nodoc:
       # run validation on the passed in value if it is supplied
       attr_accessor :verification_value
 
+      #object#type already exists, so use card_type instead
+      def card_type
+        @type
+      end
+
+      def card_type=(value)
+        @type=value
+      end
+
       # Provides proxy access to an expiry date object
       def expiry_date
         ExpiryDate.new(@month, @year)
@@ -128,7 +137,7 @@ module ActiveMerchant #:nodoc:
       
       def validate_card_type #:nodoc:
         errors.add :type, "is required" if type.blank?
-        errors.add :type, "is invalid"  unless CreditCard.card_companies.keys.include?(type)
+        errors.add :type, "is invalid"  unless CreditCard.card_companies.keys.include?(card_type)
       end
       
       def validate_essential_attributes #:nodoc:
@@ -140,7 +149,7 @@ module ActiveMerchant #:nodoc:
       end
       
       def validate_switch_or_solo_attributes #:nodoc:
-        if %w[switch solo].include?(type)
+        if %w[switch solo].include?(card_type)
           unless valid_month?(@start_month) && valid_start_year?(@start_year) || valid_issue_number?(@issue_number)
             errors.add :start_month,  "is invalid"      unless valid_month?(@start_month)
             errors.add :start_year,   "is invalid"      unless valid_start_year?(@start_year)
