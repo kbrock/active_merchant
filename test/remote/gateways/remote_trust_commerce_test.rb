@@ -5,6 +5,7 @@ class TrustCommerceTest < Test::Unit::TestCase
     @gateway = TrustCommerceGateway.new(fixtures(:trust_commerce))
     
     @credit_card = credit_card('4111111111111111')
+    @bad_credit_card = credit_card('4012345678909')
     
     @amount = 100
     
@@ -59,6 +60,10 @@ class TrustCommerceTest < Test::Unit::TestCase
     assert !response.authorization.blank?
   end
   
+  #purchase an item and storing, returning the billing id
+  def test_successful_purchase_and_store
+  end
+
   def test_unsuccessful_purchase_with_invalid_cvv
     @credit_card.verification_value = @invalid_verification_value
     assert response = @gateway.purchase(@amount, @credit_card, @options)
@@ -74,7 +79,21 @@ class TrustCommerceTest < Test::Unit::TestCase
     assert_match /The transaction was successful/, response.message
     assert_success response
   end
+
+  def test_unsuccessful_purchase_with_declined_cc
+    assert response = @gateway.purchase(@amount, @bad_credit_card, @options)
+    assert_equal Response, response.class
+    assert_match /The credit card was declined/, response.message
+    assert_equal "decline", response.params["status"]
+    assert_failure response
+  end
+
+  def test_successful_purchase_with_billing_id
+  end
   
+  def test_purchase_with_billing_id_linked_to_declined_cc
+  end
+
   def test_successful_authorize_with_avs
     assert response = @gateway.authorize(@amount, @credit_card, :billing_address => @valid_address)
     
@@ -110,6 +129,9 @@ class TrustCommerceTest < Test::Unit::TestCase
     assert response.params['transid']
   end
   
+  def test_unsuccessful_capture
+  end
+
   def test_authorization_and_void
     auth = @gateway.authorize(300, @credit_card, @options)
     assert_success auth
@@ -127,7 +149,13 @@ class TrustCommerceTest < Test::Unit::TestCase
     assert_match /The transaction was successful/, response.message
     assert_success response    
   end
+
+  # def test_unsuccessful_credit
+  # end
   
+  # def test_successful_store
+  # end
+
   def test_store_failure
     assert response = @gateway.store(@credit_card)
         
@@ -136,6 +164,9 @@ class TrustCommerceTest < Test::Unit::TestCase
     assert_failure response   
   end
   
+  # def test_successful_unstore
+  # end
+
   def test_unstore_failure
     assert response = @gateway.unstore('testme')
 
