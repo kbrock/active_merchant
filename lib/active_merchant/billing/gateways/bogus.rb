@@ -39,7 +39,7 @@ module ActiveMerchant #:nodoc:
         number = creditcard.is_a?(String) ? creditcard : creditcard.number
         case number
         when '1', GOOD_CARD, GOOD_CARD2
-          Response.new(true, SUCCESS_MESSAGE, {:paid_amount => money.to_s}, :test => true)
+          Response.new(true, SUCCESS_MESSAGE, {:paid_amount => money.to_s, :transid => '3'}, :test => true)
         when '2', BAD_CARD, BAD_CARD2
           Response.new(false, FAILURE_MESSAGE, {:paid_amount => money.to_s, :error => FAILURE_MESSAGE },:test => true)
         else
@@ -87,7 +87,7 @@ module ActiveMerchant #:nodoc:
         when '2', BAD_CARD, BAD_CARD2
           Response.new(false, FAILURE_MESSAGE, {:billingid => nil, :error => FAILURE_MESSAGE }, :test => true)
         else
-          raise Error, ERROR_MESSAGE + "was #{number}"
+          raise Error, ERROR_MESSAGE + "was #{credit_card.number}"
         end              
       end
       
